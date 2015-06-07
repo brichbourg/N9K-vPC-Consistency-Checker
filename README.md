@@ -64,7 +64,8 @@ This script requires all switches to have the same username and password (passed
 	The vPC domain ID is 10
 	Total vPCs: 2
 	Role: primary
-	No global consistency issues
+	
+	===No global consistency issues===
 
 	******************************
 	*MISMATCH DETECTED in vPC 18
@@ -92,4 +93,4 @@ This script requires all switches to have the same username and password (passed
 
 	==================== n9k2 ==================== 
 
-	Brantleys-MacBook-Pro:$ python vpcconcheck.py hostips.txt admin cisco
+	Brantleys-MacBook-Pro:$ 
