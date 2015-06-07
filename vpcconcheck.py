@@ -3,11 +3,8 @@ Cisco Nexus 9000 - vPC Consistency Checker Script
 Author: Brantley Richbourg
 email: brichbourg@gmail.com
 
-Version: 1.01
+Version: 1.10
 '''
-
-
-
 from device import Device
 import xmltodict
 import json
@@ -15,12 +12,13 @@ import sys
 import os.path
 
 def get_hostname(show_hw_dict):
+
 	hostname = show_hw_dict['ins_api']['outputs']['output']['body']['host_name']
 	return hostname
 
+#This takes the dictionary of vpc information and returns justs the vpc ids as an integer.
 def list_vpc_nums(vpcdata):
-	
-	#This takes the dictionary of vpc information and returns justs the vpc ids as an integer	
+
 	list_vpc_ids = []
 
 	for each in vpcdata:
@@ -62,12 +60,6 @@ def vpc_con_check (vpcid,vpcconinput):
 		is_vpc_data_global = True
 	else:
 		is_vpc_data_global = False
-
-	#This prints a line for non-global vPC data to show what vPC number is being checked.
-	if is_vpc_data_global == False:
-		print '*' * 15
-		print '* vPC', vpcid
-		print '*' * 15
 	
 	#This puts the data we need to check in a dictonary 	
 	vpcdata = vpcconinput['ins_api']['outputs']['output']['body']['TABLE_vpc_consistency']['ROW_vpc_consistency']
@@ -80,22 +72,28 @@ def vpc_con_check (vpcid,vpcconinput):
 		peervalue = each ['vpc-param-peer-val']
 	
 		if localvalue != peervalue:
-			print param_name, 'is not consistent'
+			print '*' * 30
+			print '*MISMATCH DETECTED in vPC', vpcid
+			print '*' * 30
+			print 'Value Name:',param_name
 			print 'Local Value: ', localvalue
-			print 'Peer Value:', peervalue, '\n'
+			print 'Peer Value:', peervalue
+			print '*' * 30, '\n'
 
-
-			#This will set a variable so the "All good" print statement doesn't print
+			#This will set a variable to show there was a vPC mismatch.
 			vpc_error_exist = True
 
 	
-	#This checks to see if certain conditions are present so the correct message is printed when no issues are detected.
+	#This checks to see if certain conditions are present so the correct message is printed when no issues are detected and returns a Boolean value to the main function.
 	if vpc_error_exist == False: 
 		if is_vpc_data_global == True:
-			print '\n<No global consistency issues>\n'
+			print '\n===No global consistency issues===\n'
 	if vpc_error_exist == False:
 		if is_vpc_data_global == False:
-			print '<<<No consistency errors with vPC', vpcid, '>>>'
+			return False #This will return True will be used to tell the main script that at least one mismatch was found for a vPC.
+	else:
+		return True #this will return False to show mismatches were found.
+			
 
 def main():
 	args = sys.argv
@@ -105,7 +103,6 @@ def main():
 		#This section will check to see if the file pass to Python in a argument actually exists
 		if os.path.exists(args[1]):
 			switch_ips = open(args[1]).read().splitlines()
-			#print switch_ips
 		else:
 			print 'File ', os.path.realpath(args[1]), 'does not exist.  Please try again'
 			sys.exit(1)
@@ -139,9 +136,10 @@ def main():
 
 			#Calls a function to return the vPC IDs from the switch.
 			vpc_list = list_vpc_nums(vpcinfo)
-			# print vpc_list, 'DEBUG: VPC NUMBERS LIST'
 
 			#Now we take the list of vPC IDs and call the NXAPI with the command show vpc con vpc X
+			vpc_error_count = 0 
+
 			for each in vpc_list:
 				stringeach = str(each)
 				string_cmd = 'show vpc consistency-parameters vpc '
@@ -152,15 +150,19 @@ def main():
 
 				#Parse the XML to JSON
 				getvpccondetailjson = xmltodict.parse(getvpccondetail[1])
-				# print getvpccondetailjson, 'VPC CON DETAIL JSON'
 
 				#This calls a function to check each indivdual vPC for inconsistencies
-				vpc_con_check(each,getvpccondetailjson)
+				is_vpc_error = vpc_con_check(each,getvpccondetailjson)
+				if is_vpc_error == True:
+					vpc_error_count +=1 
+
+			#This section will monitor if any vPCs returned mismatches, if none did, then it prints there were no errors.
+			if is_vpc_error == False:#
+				if vpc_error_count == 0:
+					print '===No vPC consistency issues===\n'
 			
 			#<<<This is the end of outputting information regarding a switch>>>
 			print '=' * 20, switchname, '=' * 20 , '\n'
-			
-
 		
 	else:
 		print 'ERROR: Invalid syntax\n'\
