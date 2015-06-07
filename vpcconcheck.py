@@ -1,3 +1,13 @@
+'''
+Cisco Nexus 9000 - vPC Consistency Checker Script
+Author: Brantley Richbourg
+email: brichbourg@gmail.com
+
+Version: 1.01
+'''
+
+
+
 from device import Device
 import xmltodict
 import json
@@ -82,10 +92,10 @@ def vpc_con_check (vpcid,vpcconinput):
 	#This checks to see if certain conditions are present so the correct message is printed when no issues are detected.
 	if vpc_error_exist == False: 
 		if is_vpc_data_global == True:
-			print '<No global vPC domain consistency issues>\n'
+			print '\n<No global consistency issues>\n'
 	if vpc_error_exist == False:
 		if is_vpc_data_global == False:
-			print '<<<No vPC consistency errors with vPC>>>', vpcid
+			print '<<<No consistency errors with vPC', vpcid, '>>>'
 
 def main():
 	args = sys.argv
