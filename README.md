@@ -9,7 +9,7 @@ Brantley Richbourg (brichbourg@gmail.com)
 Here are the required modules:
 
 
-Download and install LXML
+Download and install LXML & YAML
 	
 	sudo pip install lxml
 	sudo pip install pyyaml
