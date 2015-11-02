@@ -3,7 +3,7 @@ Cisco Nexus 9000 - vPC Consistency Checker Script
 Author: Brantley Richbourg
 email: brichbourg@gmail.com
 
-Version: 1.10
+Version: 1.1
 '''
 from device import Device
 import xmltodict

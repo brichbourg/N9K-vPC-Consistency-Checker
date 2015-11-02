@@ -11,7 +11,8 @@ Here are the required modules:
 
 Download and install LXML
 	
-	pip install lxml
+	sudo pip install lxml
+	sudo pip install pyyaml
 
 Clone this repo
 
